@@ -47,7 +47,7 @@ function AuthButton() {
         <>
         <button 
             onClick={() => signIn()}
-            className={ACTIVE_ROUTE}
+            className={INACTIVE_ROUTE}
             style={{ fontSize: "1.4rem" }}
         >   
             Sign in
