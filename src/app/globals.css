@@ -24,3 +24,7 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.glow-effect {
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+}
