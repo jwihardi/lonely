@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import addToFirestore from "../AddListing/dbSender";
 import { Edit2 } from "react-feather";
-import DashboardButton from "../AddListing/MyListing/DashBoardButton";
+import BackButton from "./BackDashboardButton";
 
 export default function CreateListing({ username }: { username: any }) {
     const [title, setTitle] = useState('');
@@ -67,7 +67,7 @@ export default function CreateListing({ username }: { username: any }) {
                         <h2 className="text-3xl font-bold bg-gradient-to-r from-green-400 to-cyan-400 bg-clip-text text-transparent">
                             Create New Listing
                         </h2>
-                        <DashboardButton />
+                        <BackButton />
                         <div className="mt-2 flex justify-center">
                             <Edit2 className="w-6 h-6 text-cyan-400" />
                         </div>

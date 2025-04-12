@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import GetMyListing from "./getMyListing";
-import DashboardButton from "./DashBoardButton";
+import DashboardButton from "../../components/DashBoardButton";
 
 export default async function CreateListingsPage() {
   const session = await getServerSession();
