@@ -1,7 +1,5 @@
 "use client";
-
 import { useEffect, useState } from "react";
-
 const phrases = [
   "Find your next project",
   "Connect with developers",
@@ -9,11 +7,9 @@ const phrases = [
   "Share your ideas",
   "Join a team",
 ];
-
 export default function AnimatedText() {
   const [currentPhrase, setCurrentPhrase] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
-
   useEffect(() => {
     const interval = setInterval(() => {
       setIsVisible(false);
@@ -22,10 +18,8 @@ export default function AnimatedText() {
         setIsVisible(true);
       }, 500);
     }, 3000);
-
     return () => clearInterval(interval);
   }, []);
-
   return (
     <div className="text-center">
       <h1 className="text-5xl font-bold mb-8">

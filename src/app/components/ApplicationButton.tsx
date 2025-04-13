@@ -1,17 +1,14 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { db } from "../firebaseConfig";
 import { doc, updateDoc, arrayUnion, getDoc, onSnapshot, collection, query, where } from "firebase/firestore";
 import ChatModal from "./ChatModal";
-
 interface ApplicationButtonProps {
   projectId: string;
   projectTitle: string;
   applicantUsername: string;
   posterUsername: string;
 }
-
 export default function ApplicationButton({ 
   projectId,
   projectTitle,
@@ -26,36 +23,34 @@ export default function ApplicationButton({
   const [applicationStatus, setApplicationStatus] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
-
   useEffect(() => {
-    const checkApplication = async () => {
-      setIsLoading(true);
-      try {
-        const projectRef = doc(db, "projects", projectId);
-        const projectDoc = await getDoc(projectRef);
-        
-        if (projectDoc.exists()) {
-          const applications = projectDoc.data().applications || [];
-          const userApplication = applications.find(
-            (app: any) => app.applicantUsername === applicantUsername
-          );
-          
-          if (userApplication) {
-            setHasApplied(true);
-            setApplicationStatus(userApplication.status);
-          }
-        }
-      } catch (error) {
-        console.error("Error checking application:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    setIsLoading(true);
     
-    checkApplication();
+    // Set up real-time listener for application status changes
+    const projectRef = doc(db, "projects", projectId);
+    const unsubscribe = onSnapshot(projectRef, (docSnapshot) => {
+      if (docSnapshot.exists()) {
+        const applications = docSnapshot.data().applications || [];
+        const userApplication = applications.find(
+          (app: any) => app.applicantUsername === applicantUsername
+        );
+        
+        if (userApplication) {
+          setHasApplied(true);
+          setApplicationStatus(userApplication.status);
+        } else {
+          setHasApplied(false);
+          setApplicationStatus("");
+        }
+      }
+      setIsLoading(false);
+    }, (error) => {
+      console.error("Error checking application:", error);
+      setIsLoading(false);
+    });
+    
+    return () => unsubscribe();
   }, [projectId, applicantUsername]);
-
-  // Track unread messages for applicant
   useEffect(() => {
     if (hasApplied) {
       const chatQuery = query(
@@ -63,51 +58,44 @@ export default function ApplicationButton({
         where("projectId", "==", projectId),
         where("applicantUsername", "==", applicantUsername)
       );
-
       const unsubscribe = onSnapshot(chatQuery, (snapshot) => {
         let count = 0;
         snapshot.forEach((doc) => {
           const data = doc.data();
-          // Only count messages from the poster to the applicant
+          // Count messages from the poster that are unread by the applicant
           if (!data.read && data.sender === posterUsername) {
             count++;
           }
         });
         setUnreadCount(count);
       });
-
       return () => unsubscribe();
     }
   }, [projectId, applicantUsername, posterUsername, hasApplied]);
-
   const handleSubmitApplication = async () => {
     if (!applicationMessage.trim()) return;
-    
     setIsSubmitting(true);
     try {
       const projectRef = doc(db, "projects", projectId);
       const projectDoc = await getDoc(projectRef);
-
       if (!projectDoc.exists()) {
         throw new Error("Project not found");
       }
-
-      // Create the application object
       const newApplication = {
         applicantUsername,
         message: applicationMessage,
         status: "pending",
         timestamp: new Date().toISOString()
       };
-
-      // Update the project document with the new application
       await updateDoc(projectRef, {
         applications: arrayUnion(newApplication)
       });
-
+      
+      // Update local state immediately
+      setHasApplied(true);
+      setApplicationStatus("pending");
       setShowApplicationForm(false);
       setApplicationMessage("");
-      alert("Application submitted successfully!");
     } catch (error) {
       console.error("Error submitting application:", error);
       alert("Error submitting application. Please try again.");
@@ -115,7 +103,6 @@ export default function ApplicationButton({
       setIsSubmitting(false);
     }
   };
-
   if (isLoading) {
     return (
       <div className="pt-8">
@@ -123,7 +110,6 @@ export default function ApplicationButton({
       </div>
     );
   }
-
   return (
     <div className="pt-8">
       {hasApplied ? (
@@ -139,14 +125,12 @@ export default function ApplicationButton({
             </span>
             <button
               onClick={() => setShowChat(true)}
-              className="px-4 py-2 border border-green-400 text-green-400 font-medium rounded-lg hover:bg-green-400/10 transition-colors relative"
+              className="px-4 py-2 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 transition-all relative"
             >
-              {applicationStatus === "accepted" ? "Open Chat" : "View Message"}
-              {unreadCount > 0 && applicationStatus === "accepted" && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {unreadCount}
-                </span>
+              {unreadCount > 0 && (
+                <span className="text-red-400 mr-1">{unreadCount}</span>
               )}
+              Chat
             </button>
           </div>
           {showChat && (
@@ -173,7 +157,6 @@ export default function ApplicationButton({
               disabled={isSubmitting}
             />
           </div>
-          
           <div className="flex gap-4">
             <button
               onClick={handleSubmitApplication}
@@ -182,7 +165,6 @@ export default function ApplicationButton({
             >
               {isSubmitting ? "Submitting..." : "Submit Application"}
             </button>
-            
             <button
               onClick={() => setShowApplicationForm(false)}
               disabled={isSubmitting}

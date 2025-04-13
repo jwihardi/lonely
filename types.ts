@@ -1,4 +1,3 @@
-// types.ts
 export interface Application {
     applicantUsername: string;
     message: string;
