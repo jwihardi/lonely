@@ -86,7 +86,7 @@ export default function LandingPage() {
       <div className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
         <div className="text-center space-y-8">
           <div className="animate-float">
-            <h1 className="text-7xl md:text-8xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+            <h1 className="text-7xl md:text-8xl font-bold bounce-text">
               BOUNCE
             </h1>
           </div>

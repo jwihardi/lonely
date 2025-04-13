@@ -1,14 +1,14 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface ListingCardProps {
   id: string;
   title: string;
   description: string;
   tags?: string[];
-  requirements?: string;
   username: string;
+  location?: string;
 }
 
 // Helper function to create URL-friendly slugs
@@ -27,31 +27,40 @@ export default function ListingCard({
   title, 
   description, 
   tags, 
-  requirements, 
-  username 
+  username,
+  location,
 }: ListingCardProps) {
-  const router = useRouter();
+  const githubUrl = `https://github.com/${username}`;
+  const listingUrl = `/listings/${id}/${slugify(title)}`;
 
-  const handleClick = () => { router.push(`/listings/${id}/${slugify(title)}`); };
-
-  return (
-    <div 
-      onClick={handleClick}
-      className="cursor-pointer bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg p-6 border border-gray-800 transition-all hover:border-green-400 hover:transform hover:-translate-y-1 hover:shadow-xl relative group"
+return (
+  <div className="relative group">
+    {/* GitHub Profile Link */}
+    <a
+      href={githubUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="absolute top-4 right-4 z-10 text-xs text-gray-400 hover:text-green-300 transition-colors"
+      onClick={(e) => e.stopPropagation()}
     >
-      {/* Username in top right corner */}
-      <div 
-        className="absolute top-4 right-4"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <span className="text-xs text-gray-400 cursor-default">
-          @{username}
-        </span>
-      </div>
+      @{username}
+    </a>
+
+    <Link 
+      href={listingUrl}
+      className="block cursor-pointer bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg p-6 border border-gray-800 transition-all hover:border-green-400 hover:transform hover:-translate-y-1 hover:shadow-xl relative"
+    >
 
       {/* Content */}
       <div className="space-y-4">
-        <h3 className="text-xl font-semibold text-green-400 pr-12">{title}</h3>
+        <div>
+          <h3 className="text-xl font-semibold text-green-400 mb-1">{title}</h3>
+          {location && (
+            <span className="text-sm text-gray-400">
+              <span className="text-green-400">📍</span> {location}
+            </span>
+          )}
+        </div>
         
         <p className="text-gray-300 text-sm line-clamp-3">
           {description}
@@ -69,19 +78,11 @@ export default function ListingCard({
             ))}
           </div>
         )}
-
-        {requirements && (
-          <div className="pt-4 border-t border-gray-800">
-            <h4 className="text-sm font-medium text-gray-400 mb-1">Requirements</h4>
-            <p className="text-gray-500 text-sm line-clamp-2">
-              {requirements}
-            </p>
-          </div>
-        )}
       </div>
 
       {/* Hover indicator */}
       <div className="absolute inset-0 border-2 border-green-400 rounded-lg opacity-0 group-hover:opacity-20 transition-opacity pointer-events-none" />
-    </div>
+    </Link>
+  </div>
   );
 }
