@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { db } from "../firebaseConfig";
 import { 
@@ -16,7 +15,6 @@ import {
   DocumentSnapshot
 } from "firebase/firestore";
 import { useSession } from "next-auth/react";
-
 interface Notification {
   id: string;
   type: string;
@@ -26,36 +24,27 @@ interface Notification {
   sender: string;
   projectId?: string;
 }
-
 export default function Notifications() {
   const { data: session } = useSession();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-
   useEffect(() => {
     if (!session?.user?.name) return;
-
     const notificationsRef = collection(db, "notifications");
     const q = query(
       notificationsRef,
       where("recipient", "==", session.user.name)
     );
-
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const newNotifications = snapshot.docs.map((doc: DocumentSnapshot<DocumentData>) => ({
         id: doc.id,
         ...doc.data(),
       }));
-
-      // Count unread notifications
       const newUnreadCount = newNotifications.filter(
         (n: any) => !n.read
       ).length;
-
       setNotifications(newNotifications);
       setUnreadCount(newUnreadCount);
-
-      // Mark notifications as read when the user views them
       newNotifications.forEach(async (notification: any) => {
         if (!notification.read) {
           await updateDoc(doc(db, "notifications", notification.id), {
@@ -64,10 +53,8 @@ export default function Notifications() {
         }
       });
     });
-
     return () => unsubscribe();
   }, [session?.user?.name]);
-
   const markAllAsRead = async () => {
     const notificationsRef = collection(db, "notifications");
     const q = query(
@@ -75,17 +62,13 @@ export default function Notifications() {
       where("recipient", "==", session?.user?.name),
       where("read", "==", false)
     );
-
     const snapshot = await getDocs(q);
     const batch = writeBatch(db);
-
     snapshot.forEach((doc) => {
       batch.update(doc.ref, { read: true });
     });
-
     await batch.commit();
   };
-
   return (
     <div className="relative">
       <button
@@ -99,7 +82,6 @@ export default function Notifications() {
           </span>
         )}
       </button>
-
       {notifications.length > 0 && (
         <div className="absolute right-0 mt-2 w-64 bg-gray-800 rounded-lg shadow-lg border border-gray-700">
           <div className="p-2 space-y-2 max-h-96 overflow-y-auto">
@@ -125,7 +107,6 @@ export default function Notifications() {
                     <button
                       className="text-blue-400 text-sm hover:underline"
                       onClick={() => {
-                        // Navigate to project page
                         window.location.href = `/Project/${notification.projectId}`;
                       }}
                     >

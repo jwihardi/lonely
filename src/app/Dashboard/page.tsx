@@ -21,7 +21,6 @@ export default async function HomePage({
   const tagFilter = resolvedSearchParams?.tags || '';
   const listings = await GetAllListings(searchQuery);
 
-  // Filter listings by tags if tags are selected
   const filteredListings = tagFilter
     ? listings.filter(listing => 
         listing.tags?.some(tag => 

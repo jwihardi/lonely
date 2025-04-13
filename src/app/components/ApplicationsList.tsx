@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { doc, updateDoc, arrayRemove, arrayUnion, onSnapshot, collection, query, where } from "firebase/firestore";
+import { doc, updateDoc, arrayRemove, arrayUnion, onSnapshot, collection, query, where, getDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import ChatModal from "./ChatModal";
 
@@ -29,7 +29,6 @@ export default function ApplicationsList({
   const [selectedApplicant, setSelectedApplicant] = useState<string | null>(null);
   const [unreadCounts, setUnreadCounts] = useState<{[key: string]: number}>({});
 
-  // Listen for real-time updates to applications
   useEffect(() => {
     const projectRef = doc(db, "projects", projectId);
     const unsubscribe = onSnapshot(projectRef, (doc) => {
@@ -40,11 +39,9 @@ export default function ApplicationsList({
         }
       }
     });
-
     return () => unsubscribe();
   }, [projectId]);
 
-  // Track unread messages for each chat
   useEffect(() => {
     const unsubscribes = applications.map(app => {
       const chatQuery = query(
@@ -52,7 +49,6 @@ export default function ApplicationsList({
         where("projectId", "==", projectId),
         where("applicantUsername", "==", app.applicantUsername)
       );
-
       return onSnapshot(chatQuery, (snapshot) => {
         let unreadCount = 0;
         snapshot.forEach((doc) => {
@@ -61,7 +57,6 @@ export default function ApplicationsList({
           const isMessageFromOtherPerson = isCurrentUserPoster ? 
             data.sender === app.applicantUsername : 
             data.sender === posterUsername;
-
           if (!data.read && isMessageFromOtherPerson) {
             unreadCount++;
           }
@@ -72,9 +67,9 @@ export default function ApplicationsList({
         }));
       });
     });
-
     return () => unsubscribes.forEach(unsub => unsub());
   }, [applications, projectId, posterUsername]);
+
   if (!applications || applications.length === 0) {
     return (
       <div className="pt-8">
@@ -86,7 +81,9 @@ export default function ApplicationsList({
 
   return (
     <div className="pt-8">
-      <h2 className="text-2xl font-semibold text-green-400 mb-6">Applications ({applications.length})</h2>
+      <h2 className="text-2xl font-semibold text-green-400 mb-6">
+        Applications ({applications.length})
+      </h2>
       <div className="space-y-6">
         {applications.map((application, index) => (
           <div 
@@ -120,65 +117,100 @@ export default function ApplicationsList({
                 {application.status}
               </span>
             </div>
-            <p className="text-gray-300 whitespace-pre-wrap">{application.message}</p>
-            
-            {/* Action Buttons */}
-            <div className="mt-4 flex gap-3">
-              {application.status === "pending" && (
-                <button
-                  onClick={async () => {
-                    const projectRef = doc(db, "projects", projectId);
-                    const updatedApplication = {
-                      ...application,
-                      status: "accepted"
-                    };
-                    
-                    try {
-                      await updateDoc(projectRef, {
-                        applications: arrayRemove(application)
-                      });
-                      await updateDoc(projectRef, {
-                        applications: arrayUnion(updatedApplication)
-                      });
 
-                      // Update local state
-                      setApplications(prevApplications => 
-                        prevApplications.map(app => 
-                          app.applicantUsername === application.applicantUsername &&
-                          app.timestamp === application.timestamp
-                            ? updatedApplication
-                            : app
-                        )
-                      );
-                    } catch (error) {
-                      console.error("Error accepting application:", error);
-                      alert("Error accepting application. Please try again.");
-                    }
-                  }}
-                  className="px-4 py-2 bg-green-400 text-gray-900 font-medium rounded-lg hover:bg-green-300 transition-colors"
-                >
-                  Accept
-                </button>
-              )}
-              <button
-                onClick={() => setSelectedApplicant(application.applicantUsername)}
-                className={`px-4 py-2 border font-medium rounded-lg transition-colors relative ${application.status === "accepted" 
-                  ? "border-green-400 text-green-400 hover:bg-green-400/10"
-                  : "border-gray-600 text-gray-400 hover:bg-gray-800"}`}
-              >
-                {application.status === "accepted" ? "Open Chat" : "View Message"}
-                {unreadCounts[application.applicantUsername] > 0 && application.status === "accepted" && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {unreadCounts[application.applicantUsername]}
-                  </span>
+            <div className="space-y-4">
+              <p className="text-gray-300 whitespace-pre-wrap">
+                {application.message}
+              </p>
+              <div className="flex gap-2">
+                {application.status === "pending" && (
+                  <>
+                    <button
+                      onClick={async () => {
+                        try {
+                          const projectRef = doc(db, "projects", projectId);
+                          
+                          // First, get the current applications
+                          const projectDoc = await getDoc(projectRef);
+                          if (!projectDoc.exists()) {
+                            throw new Error("Project not found");
+                          }
+                          
+                          const currentApps = projectDoc.data().applications || [];
+                          
+                          // Create the updated applications array
+                          const updatedApps = currentApps.map((app: Application) => {
+                            if (app.applicantUsername === application.applicantUsername && 
+                                app.timestamp === application.timestamp) {
+                              return { ...app, status: "accepted" };
+                            }
+                            return app;
+                          });
+                          
+                          // Update with the new array
+                          await updateDoc(projectRef, { applications: updatedApps });
+                          
+                        } catch (error) {
+                          console.error("Error accepting application:", error);
+                          alert("Error accepting application. Please try again.");
+                        }
+                      }}
+                      className="px-4 py-2 rounded-lg bg-green-400/20 text-green-400 hover:bg-green-400/30 transition-all"
+                    >
+                      Accept
+                    </button>
+                    <button
+                      onClick={async () => {
+                        try {
+                          const projectRef = doc(db, "projects", projectId);
+                          
+                          // First, get the current applications
+                          const projectDoc = await getDoc(projectRef);
+                          if (!projectDoc.exists()) {
+                            throw new Error("Project not found");
+                          }
+                          
+                          const currentApps = projectDoc.data().applications || [];
+                          
+                          // Create the updated applications array
+                          const updatedApps = currentApps.map((app: Application) => {
+                            if (app.applicantUsername === application.applicantUsername && 
+                                app.timestamp === application.timestamp) {
+                              return { ...app, status: "rejected" };
+                            }
+                            return app;
+                          });
+                          
+                          // Update with the new array
+                          await updateDoc(projectRef, { applications: updatedApps });
+                          
+                        } catch (error) {
+                          console.error("Error rejecting application:", error);
+                          alert("Error rejecting application. Please try again.");
+                        }
+                      }}
+                      className="px-4 py-2 rounded-lg bg-red-400/20 text-red-400 hover:bg-red-400/30 transition-all"
+                    >
+                      Reject
+                    </button>
+                  </>
                 )}
-              </button>
+                <button
+                  onClick={() => setSelectedApplicant(application.applicantUsername)}
+                  className="px-4 py-2 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 transition-all"
+                >
+                  {unreadCounts[application.applicantUsername] > 0 && (
+                    <span className="text-red-400 mr-1">
+                      {unreadCounts[application.applicantUsername]}
+                    </span>
+                  )}
+                  Chat
+                </button>
+              </div>
             </div>
           </div>
         ))}
       </div>
-
-      {/* Chat Modal */}
       {selectedApplicant && (
         <ChatModal
           projectId={projectId}

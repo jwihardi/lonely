@@ -3,14 +3,12 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Home, Layout, Info, LogIn, LogOut } from "react-feather";
-
 export default function LandingPage() {
   const { data: session } = useSession();
   const pathname = usePathname();
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-900">
-      {/* Navigation */}
+      {}
       <nav className="fixed top-0 w-full bg-gray-900/80 backdrop-blur-lg border-b border-gray-800 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -26,7 +24,6 @@ export default function LandingPage() {
                 <Home className="w-5 h-5" />
                 <span className="font-medium">Home</span>
               </Link>
-
               {session && (
                 <Link
                   href="/Dashboard"
@@ -40,7 +37,6 @@ export default function LandingPage() {
                   <span className="font-medium">Dashboard</span>
                 </Link>
               )}
-
               <Link
                 href="/about"
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 ${
@@ -53,7 +49,6 @@ export default function LandingPage() {
                 <span className="font-medium">About</span>
               </Link>
             </div>
-
             <div className="flex items-center space-x-4">
               {session ? (
                 <div className="flex items-center gap-4">
@@ -81,8 +76,7 @@ export default function LandingPage() {
           </div>
         </div>
       </nav>
-
-      {/* Hero Section */}
+      {}
       <div className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
         <div className="text-center space-y-8">
           <div className="animate-float">
@@ -90,7 +84,6 @@ export default function LandingPage() {
               BOUNCE
             </h1>
           </div>
-          
           <div className="group relative max-w-2xl mx-auto">
             <div className="absolute -inset-1 bg-gradient-to-r from-blue-400/30 to-cyan-400/30 rounded-lg blur opacity-30 group-hover:opacity-50 transition duration-1000"></div>
             <div className="relative space-y-4">
@@ -104,7 +97,6 @@ export default function LandingPage() {
               </p>
             </div>
           </div>
-
           <div className="mt-8">
             <Link
               href={session ? "/Dashboard" : "/api/auth/signin"}
@@ -115,8 +107,7 @@ export default function LandingPage() {
           </div>
         </div>
       </div>
-
-      {/* Animated Background Elements */}
+      {}
       <div className="absolute top-0 left-0 w-full h-full -z-10 opacity-20">
         <div className="absolute w-96 h-96 bg-blue-400/20 rounded-full blur-3xl -top-48 -left-48"></div>
         <div className="absolute w-96 h-96 bg-cyan-400/20 rounded-full blur-3xl -bottom-48 -right-48"></div>

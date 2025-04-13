@@ -1,14 +1,11 @@
 "use client";
-
 import { useSession } from "next-auth/react";
 import ApplicationButton from "../../../components/ApplicationButton";
-
 interface ListingDetailClientProps {
   projectId: string;
   projectTitle: string;
   posterUsername: string;
 }
-
 export default function ListingDetailClient({
   projectId,
   projectTitle,
@@ -17,8 +14,8 @@ export default function ListingDetailClient({
   const { data: session } = useSession();
   const currentUsername = session?.user?.name;
 
-  if (currentUsername === posterUsername) {
-    return null; // Don't show application button if the user is the poster
+  if (!currentUsername || currentUsername === posterUsername) {
+    return null;
   }
 
   return (
@@ -26,7 +23,8 @@ export default function ListingDetailClient({
       <ApplicationButton
         projectId={projectId}
         projectTitle={projectTitle}
-        username={currentUsername || ""}
+        applicantUsername={currentUsername}
+        posterUsername={posterUsername}
       />
     </div>
   );

@@ -1,10 +1,9 @@
 "use client";
-
 import { useState } from "react";
 import { Autocomplete } from "@react-google-maps/api";
 import { useGoogleMaps } from "./GoogleMapsProvider";
 
-// Comprehensive US state abbreviation mapping
+// more hard coding cuz my search is trash
 const STATE_ABBREVIATIONS: { [key: string]: string } = {
   Alabama: 'AL',
   Alaska: 'AK',
@@ -57,17 +56,14 @@ const STATE_ABBREVIATIONS: { [key: string]: string } = {
   Wisconsin: 'WI',
   Wyoming: 'WY'
 };
-
 interface LocationSearchProps {
   onLocationSelect: (location: string) => void;
   onClear: () => void;
 }
-
 export default function LocationSearch({ onLocationSelect, onClear }: LocationSearchProps) {
   const [location, setLocation] = useState("");
   const [hasSelection, setHasSelection] = useState(false);
   const { googleMapsLoaded } = useGoogleMaps();
-
   const handlePlaceSelect = (place: google.maps.places.PlaceResult | null) => {
     if (place?.formatted_address) {
       setLocation(place.formatted_address);
@@ -76,9 +72,7 @@ export default function LocationSearch({ onLocationSelect, onClear }: LocationSe
         (component: google.maps.GeocoderAddressComponent) =>
           component.types.includes('administrative_area_level_1')
       );
-      
       if (stateComponent?.long_name) {
-        // Check if it's already an abbreviation
         const isAbbreviation = stateComponent.long_name.length === 2;
         const stateName = isAbbreviation 
           ? Object.entries(STATE_ABBREVIATIONS).find(([_, abbr]) => abbr === stateComponent.long_name)?.[0] 
@@ -95,17 +89,14 @@ export default function LocationSearch({ onLocationSelect, onClear }: LocationSe
       setHasSelection(true);
     }
   };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setLocation(value);
-    // Only clear the selection if the input is empty AND we had a previous selection
     if (value === "" && hasSelection) {
       onClear();
       setHasSelection(false);
     }
   };
-
   return (
     <div className="relative">
       <style jsx global>{`
@@ -116,18 +107,15 @@ export default function LocationSearch({ onLocationSelect, onClear }: LocationSe
           border: 1px solid #374151 !important;
           box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
         }
-        
         .pac-item {
           background-color: #1f2937 !important;
           color: #ffffff !important;
           border-bottom: 1px solid #374151 !important;
         }
-        
         .pac-item:hover {
           background-color: #374151 !important;
           color: #ffffff !important;
         }
-        
         .pac-item-query {
           color: #ffffff !important;
         }
