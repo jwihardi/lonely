@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -27,4 +28,52 @@ body {
 
 .glow-effect {
   box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+}
+
+.pac-container {
+  background-color: #1f2937 !important;
+  color: #ffffff !important;
+  border-radius: 0.5rem !important;
+  border: 1px solid #374151 !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+}
+
+.pac-item {
+  background-color: #1f2937 !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid #374151 !important;
+}
+
+.pac-item:hover {
+  background-color: #374151 !important;
+  color: #ffffff !important;
+}
+
+.pac-item-query {
+  color: #ffffff !important;
+}
+
+@layer base {
+  .bounce-text {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    background: linear-gradient(45deg, #00ff88, #00bfff, #ff00ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% 200%;
+    animation: gradient 5s ease infinite;
+  }
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }

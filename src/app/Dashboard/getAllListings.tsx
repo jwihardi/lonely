@@ -10,15 +10,16 @@ export default async function GetAllListings(searchQuery: string = '') {
 
 
     if (searchQuery) {
+        const uppercaseSearch = searchQuery.toUpperCase();
         title_q = query(
             listingsRef,
-            where("title", ">=", searchQuery.toLowerCase()),
-            where("title", "<=", searchQuery.toLowerCase() + "\uf8ff")
+            where("title", ">=", uppercaseSearch),
+            where("title", "<=", uppercaseSearch + "\uf8ff")
         );
         username_q = query(
             listingsRef,
-            where("username", ">=", searchQuery.toLowerCase()),
-            where("username", "<=", searchQuery.toLowerCase() + "\uf8ff")
+            where("username", ">=", uppercaseSearch),
+            where("username", "<=", uppercaseSearch + "\uf8ff")
         );
     }
     

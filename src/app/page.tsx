@@ -9,7 +9,9 @@ export default async function Home() {
 
   return (
     <SessionProvider session={session}>
-    <NavMenu />
+      <div className="min-h-screen bg-gray-950">
+        <NavMenu />
+      </div>
     </SessionProvider>
   );
 }
